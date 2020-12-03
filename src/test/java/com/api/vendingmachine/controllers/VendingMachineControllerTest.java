@@ -162,4 +162,51 @@ public class VendingMachineControllerTest {
         assertEquals(expectedOutput, actualOutput);
     }
 
+    @Test
+    public void getProductMultipleRequestTest() throws Exception {
+
+        Product product = new Product(1, 15, "Product");
+        Product product2 = new Product(2, 5, "Product");
+
+        VendingMachineOutput expectedOutput = new VendingMachineOutput(1,
+                product2, new Amount(0),new Amount(5),OperationStatus.PRODUCT_DISPATCHED);
+
+        VendingMachineOutput output1 = new VendingMachineOutput(1, null,
+                new Amount(10), new Amount(0),OperationStatus.INSUFFICIENT_BALANCE);
+
+        when(requestService.getRequestByIdAndStatus(1, Status.MONEY_ADDED)).thenReturn(request);
+        when(productService.getProduct(1)).thenReturn(product);
+
+        VendingMachineOutput actualOutput1 = vendingMachineController.product(1, 1);
+
+        assertEquals(output1, actualOutput1);
+
+
+        when(productService.getProduct(2)).thenReturn(product2);
+        VendingMachineOutput actualOutput2 = vendingMachineController.product(2, 1);
+        assertEquals(expectedOutput, actualOutput2);
+
+    }
+
+    @Test
+    public void getProductMultipleRequestFirstProductEmptyTest() throws Exception {
+
+        Product product = new Product(1, 0, "Product");
+        Product product2 = new Product(2, 5, "Product");
+
+        VendingMachineOutput expectedOutput = new VendingMachineOutput(1,
+                product2, new Amount(0),new Amount(5),OperationStatus.PRODUCT_DISPATCHED);
+
+        when(requestService.getRequestByIdAndStatus(1, Status.MONEY_ADDED)).thenReturn(request);
+        when(productService.getProduct(1)).thenReturn(product);
+
+        assertThrows(Exception.class, () ->  vendingMachineController.product(1, 1));
+
+
+        when(productService.getProduct(2)).thenReturn(product2);
+        VendingMachineOutput actualOutput2 = vendingMachineController.product(2, 1);
+        assertEquals(expectedOutput, actualOutput2);
+
+    }
+
 }
