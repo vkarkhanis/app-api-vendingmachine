@@ -86,9 +86,6 @@ public class VendingMachineController {
                 throw new Exception("No request with the given request Id: " + requestId + "found");
             }
 
-            req.setStatus(Status.PROCESSING_ORDER);
-            requestService.updateRequest(req);
-
             Product product = productService.getProduct(productId);
 
             if(product.getPrice() <= 0) {
@@ -101,6 +98,9 @@ public class VendingMachineController {
                         new Amount(req.getBalance()), new Amount(0),OperationStatus.INSUFFICIENT_BALANCE);
 
             }
+
+            req.setStatus(Status.PROCESSING_ORDER);
+            requestService.updateRequest(req);
 
             double change = req.getBalance() - product.getPrice();
 
