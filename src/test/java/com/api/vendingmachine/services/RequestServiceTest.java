@@ -1,6 +1,5 @@
 package com.api.vendingmachine.services;
 
-import com.api.vendingmachine.models.Amount;
 import com.api.vendingmachine.models.Request;
 import com.api.vendingmachine.store.RequestRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,28 +42,15 @@ public class RequestServiceTest {
     @Test
     public void updateRequest() throws Exception {
 
-        when(requestRepository.findById(1)).thenReturn(Optional.of(request));
 
         Request newReq = new Request();
         newReq.setBalance(20);
         newReq.setStatus(Status.PROCESSING_ORDER);
+        when(requestRepository.save(newReq)).thenReturn(newReq);
 
-        when(requestRepository.save(request)).thenReturn(newReq);
         Request req = requestService.updateRequest(newReq);
 
         assertEquals(newReq, req);
-    }
-
-    @Test
-    public void updateRequestFailure() {
-
-        when(requestRepository.findById(1)).thenReturn(Optional.empty());
-
-        Request newReq = new Request();
-        newReq.setBalance(20);
-        newReq.setStatus(Status.PROCESSING_ORDER);
-
-        assertThrows(Exception.class, () -> requestService.updateRequest(newReq));
     }
 
     @Test
@@ -80,34 +66,6 @@ public class RequestServiceTest {
         when(requestRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(Exception.class, () -> requestService.getRequest(1));
-    }
-
-    @Test
-    public void terminateRequestTest() throws Exception {
-
-        when(requestRepository.fetchPendingRequestById(1)).thenReturn(request);
-        when(requestRepository.save(request)).thenReturn(terminateRequest);
-
-        Request req = requestService.terminateRequest(1);
-
-        assertEquals(terminateRequest, req);
-    }
-
-    @Test
-    public void terminateInvalidRequestTest() throws Exception {
-
-        when(requestRepository.fetchPendingRequestById(1)).thenReturn(null);
-
-        assertThrows(Exception.class, () -> requestService.terminateRequest(1));
-    }
-
-    @Test
-    public void fetchPendingRequestByIdTest() {
-
-        when(requestRepository.fetchPendingRequestById(1)).thenReturn(request);
-
-        Request req = requestService.getPendingRequestById(1);
-        assertEquals(request, req);
     }
 
     @Test

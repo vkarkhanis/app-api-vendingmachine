@@ -7,7 +7,7 @@ import util.Status;
 
 public interface RequestRepository extends JpaRepository<Request, Integer> {
 
-    @Query("from #{#entityName} where id = ?1 and status in (1, 2)")
+    @Query("from Request where id = ?1 and status in ('MONEY_ADDED', 'PROCESSING_ORDER')")
     Request fetchPendingRequestById(int requestId);
 
     @Query("from #{#entityName} where id = ?1 and status =?2")

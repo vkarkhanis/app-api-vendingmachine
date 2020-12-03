@@ -1,17 +1,33 @@
 package com.api.vendingmachine.models;
 
+import javax.persistence.*;
 import java.util.Objects;
 
+@Entity
+@Table(name = "product")
 public class Product {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private double price;
     private String name;
 
+    public Product(){}
     public Product(int id, double price, String name) {
         this.id = id;
         this.price = price;
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", price=" + price +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     @Override

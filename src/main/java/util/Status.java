@@ -8,5 +8,9 @@ public enum Status {
         this.statusId = statusId;
     }
 
+    public int getStatusId() {
+        return this.statusId;
+    }
+
     private int statusId;
 }

@@ -11,11 +11,12 @@ public class Request {
 
     public Request() {}
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private double balance;
+
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     public int getId() {

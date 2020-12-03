@@ -2,34 +2,32 @@ package com.api.vendingmachine.models;
 
 import util.OperationStatus;
 
+import java.util.Objects;
+
 public class VendingMachineOutput {
 
     private int requestId;
     private Product productToDispatch;
-    private DisplayMessages messagesToShow;
     private OperationStatus operationStatus;
     private Amount change;
+    private Amount currentBalance;
 
-    public VendingMachineOutput(int requestId,
-                                Product productToDispatch,
-                                DisplayMessages messagesToShow,
-                                OperationStatus operationStatus) {
-
-        this.requestId = requestId;
-        this.productToDispatch = productToDispatch;
-        this.messagesToShow = messagesToShow;
-        this.operationStatus = operationStatus;
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestId, productToDispatch, operationStatus, change, currentBalance);
     }
 
     public VendingMachineOutput(int requestId,
                                 Product productToDispatch,
-                                DisplayMessages messagesToShow,
+                                Amount currentBalance,
                                 Amount change,
                                 OperationStatus operationStatus) {
 
-        this(requestId, productToDispatch, messagesToShow, operationStatus);
+        this.requestId = requestId;
+        this.productToDispatch = productToDispatch;
+        this.operationStatus = operationStatus;
+        this.currentBalance = currentBalance;
         this.change = change;
-
     }
 
     public int getRequestId() {
@@ -40,9 +38,40 @@ public class VendingMachineOutput {
         return productToDispatch;
     }
 
-    public DisplayMessages getMessagesToShow() {
-        return messagesToShow;
+    public OperationStatus getOperationStatus() { return operationStatus; }
+
+    public Amount getChange() { return change; }
+
+    public Amount getCurrentBalance() { return currentBalance; }
+
+    @Override
+    public String toString() {
+        return "VendingMachineOutput{" +
+                "requestId=" + requestId +
+                ", productToDispatch=" + productToDispatch +
+                ", operationStatus=" + operationStatus +
+                ", change=" + change +
+                ", currentBalance=" + currentBalance +
+                '}';
     }
 
-    public OperationStatus getOperationStatus() { return operationStatus; }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VendingMachineOutput that = (VendingMachineOutput) o;
+
+        boolean isProductEqual = false;
+        if (productToDispatch == null) {
+            isProductEqual = (that.productToDispatch == null);
+        } else {
+            isProductEqual = productToDispatch.equals(that.productToDispatch);
+        }
+
+        return requestId == that.requestId &&
+                isProductEqual  &&
+                operationStatus == that.operationStatus &&
+                change.equals(that.change) &&
+                currentBalance.equals(that.currentBalance);
+    }
 }

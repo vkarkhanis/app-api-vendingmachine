@@ -64,42 +64,16 @@ public class MoneyServiceTest {
     }
 
     @Test
-    public void calculateChange() throws Exception {
+    public void refundRequestTest() {
 
-        when(requestService.getRequest(1)).thenReturn(request);
+        Request terminateRequest = new Request();
+        terminateRequest.setStatus(Status.MONEY_REFUNDED);
+        terminateRequest.setBalance(0);
 
-        Amount returnedAmount = moneyService.calculateChange(new Amount(5), 1);
-        assertEquals(15, returnedAmount.getAmount());
+        when(requestService.updateRequest(request)).thenReturn(terminateRequest);
+        Request req = moneyService.makeRefund(request);
 
+        assertEquals(terminateRequest, req);
     }
-
-    @Test
-    public void calculateChangeNullProductCost() throws Exception {
-        when(requestService.getRequest(1)).thenReturn(request);
-        assertThrows(Exception.class, () -> moneyService.calculateChange(null, 1));
-
-    }
-
-    @Test
-    public void calculateChangeNegativeProductCost() throws Exception {
-        when(requestService.getRequest(1)).thenReturn(request);
-        assertThrows(Exception.class, () -> moneyService.calculateChange(new Amount(-1), 1));
-
-    }
-
-    @Test
-    public void calculateChangeInsufficientBalance() throws Exception {
-        when(requestService.getRequest(1)).thenReturn(request);
-        assertThrows(Exception.class, () -> moneyService.calculateChange(new Amount(25), 1));
-
-    }
-
-    @Test
-    public void calculateChangeInvalidRequest() throws Exception {
-        when(requestService.getRequest(1)).thenReturn(null);
-        assertThrows(Exception.class, () -> moneyService.calculateChange(new Amount(10), 1));
-
-    }
-
 
 }

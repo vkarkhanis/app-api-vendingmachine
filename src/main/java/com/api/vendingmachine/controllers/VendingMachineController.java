@@ -26,10 +26,16 @@ public class VendingMachineController {
     public VendingMachineOutput amount(@RequestBody Amount amount) throws Exception {
         try {
             Request req = moneyService.addMoney(amount, 0);
-            return new VendingMachineOutput(req.getId(), null, new DisplayMessages("Current Balance: " + req.getBalance(), "Awaiting product selection"), OperationStatus.SUCCESS);
+
+            if(req == null) {
+                throw new Exception("Error while adding amount");
+            }
+            return new VendingMachineOutput(req.getId(), null,
+                                            new Amount(req.getBalance()), new Amount(0),
+                                            OperationStatus.MONEY_ADDED);
 
         } catch (Exception e) {
-            return new VendingMachineOutput(0, null, new DisplayMessages("Current Balance: " + (0), "There was some problem in processing your order. PLease collect your refund"), amount, OperationStatus.FAILURE);
+            throw new Exception("Error while adding amount", e);
         }
 
     }
@@ -39,11 +45,11 @@ public class VendingMachineController {
 
         try {
             Request req = moneyService.addMoney(amount, requestId);
-            return new VendingMachineOutput(req.getId(), null, new DisplayMessages("Current Balance: " + req.getBalance(), "Awaiting product selection"), OperationStatus.SUCCESS);
+            return new VendingMachineOutput(req.getId(), null,
+                    new Amount(req.getBalance()),  new Amount(0), OperationStatus.MONEY_UPDATED);
 
         } catch (Exception e) {
-            System.err.println(e);
-            return new VendingMachineOutput(requestId, null, new DisplayMessages("Error showing the current balance. Please contact helpdesk", "There was some problem adding amount. Please collect back the newly added amount"), amount, OperationStatus.FAILURE);
+            throw new Exception("Exception while updating the amount for request id: " + requestId, e);
         }
 
     }
@@ -52,11 +58,20 @@ public class VendingMachineController {
     public VendingMachineOutput refund(@RequestParam int requestId) throws Exception {
 
         try {
-            Request req = requestService.terminateRequest(requestId);
-            return new VendingMachineOutput(req.getId(), null, new DisplayMessages("Current Balance: " + (0), "Refund done"), new Amount(req.getBalance()), OperationStatus.SUCCESS);
+            Request req = requestService.getPendingRequestById(requestId);
+            if (req == null) {
+                throw new Exception("No request with the given request Id: " + requestId + "found");
+            }
+
+            double currentBalance = req.getBalance();
+
+            moneyService.makeRefund(req);
+
+            return new VendingMachineOutput(req.getId(), null,
+                    new Amount(0), new Amount(currentBalance), OperationStatus.REFUND_PROCESSED);
+
         } catch(Exception e) {
-            System.err.println(e);
-            return new VendingMachineOutput(requestId, null, new DisplayMessages("Current Balance: " + (0), "Error when processing refund. Please contact support"), OperationStatus.FAILURE);
+            throw new Exception("Error when processing refund. Please contact customer service", e);
         }
 
     }
@@ -65,23 +80,39 @@ public class VendingMachineController {
     public VendingMachineOutput product(@PathVariable int productId, @RequestParam int requestId) throws Exception {
 
         try {
-            Request req = requestService.getRequest(requestId);
+            Request req = requestService.getRequestByIdAndStatus(requestId, Status.MONEY_ADDED);
+
+            if (req == null) {
+                throw new Exception("No request with the given request Id: " + requestId + "found");
+            }
+
             req.setStatus(Status.PROCESSING_ORDER);
             requestService.updateRequest(req);
 
             Product product = productService.getProduct(productId);
-            Amount change = moneyService.calculateChange(new Amount(product.getPrice()), requestId);
+
+            if(product.getPrice() <= 0) {
+                throw new Exception("Product price not found");
+            }
+
+            if (product.getPrice() > req.getBalance()) {
+
+                return new VendingMachineOutput(requestId, null,
+                        new Amount(req.getBalance()), new Amount(0),OperationStatus.INSUFFICIENT_BALANCE);
+
+            }
+
+            double change = req.getBalance() - product.getPrice();
 
             req.setBalance(0);
             req.setStatus(Status.REQUEST_COMPLETED);
             requestService.updateRequest(req);
 
-            return new VendingMachineOutput(requestId, product, new DisplayMessages("Changed To Be Returned: " + (change.getAmount()), "Order Completed"), change, OperationStatus.SUCCESS);
+            return new VendingMachineOutput(requestId,
+                    product, new Amount(0),new Amount(change),OperationStatus.PRODUCT_DISPATCHED);
 
         } catch(Exception e) {
-            System.err.println(e);
-
-            return this.refund(requestId);
+           throw new Exception("Processing error. Please contact customer service", e);
         }
     }
 

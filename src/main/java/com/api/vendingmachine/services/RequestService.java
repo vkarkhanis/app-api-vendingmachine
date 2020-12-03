@@ -30,19 +30,6 @@ public class RequestService {
         }
     }
 
-    public Request terminateRequest(int requestId) throws Exception {
-        Request req = getPendingRequestById(requestId);
-
-        if (req == null) {
-            throw new Exception("Invalid request id");
-        }
-
-        req.setStatus(Status.MONEY_REFUNDED);
-        req.setBalance(0);
-
-        return requestRepository.save(req);
-    }
-
     public Request getPendingRequestById(int requestId) {
         return requestRepository.fetchPendingRequestById(requestId);
     }

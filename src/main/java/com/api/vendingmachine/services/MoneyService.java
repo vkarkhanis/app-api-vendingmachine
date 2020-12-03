@@ -40,24 +40,12 @@ public class MoneyService {
         return reqCreated;
     }
 
-    public Amount calculateChange(Amount productCost, int requestId) throws Exception{
+    public Request makeRefund(Request req) {
 
-        Request reqCreated = requestService.getRequest(requestId);
+        req.setStatus(Status.MONEY_REFUNDED);
+        req.setBalance(0);
 
-        if (reqCreated == null) {
-            throw new Exception("Illegal request made");
-        }
-
-        if(productCost == null || productCost.getAmount() <= 0) {
-
-            throw new Exception("Incorrect product cost");
-        }
-
-        if(productCost.getAmount() > reqCreated.getBalance()) {
-            throw new Exception("Insufficient Balance. Please collect the refund");
-        }
-
-        return new Amount(reqCreated.getBalance() - productCost.getAmount());
+        return requestService.updateRequest(req);
     }
 
 }
