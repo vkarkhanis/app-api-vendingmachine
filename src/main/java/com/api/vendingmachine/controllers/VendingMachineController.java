@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import util.OperationStatus;
 import util.Status;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/vendingmachine")
+@CrossOrigin(origins="http://localhost:3000")
 public class VendingMachineController {
 
     @Autowired
@@ -114,6 +117,11 @@ public class VendingMachineController {
         } catch(Exception e) {
            throw new Exception("Processing error. Please contact customer service", e);
         }
+    }
+
+    @GetMapping("/product")
+    public List<Product> products() throws Exception {
+        return productService.getAllProducts();
     }
 
 }

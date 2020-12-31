@@ -7,6 +7,8 @@ import com.api.vendingmachine.store.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -36,6 +38,17 @@ public class ProductService {
 
         this.reduceInventory(productInventory.get());
         return product.get();
+    }
+
+    public List<Product> getAllProducts() throws Exception {
+
+        List<Product> products = this.productRepository.findAll();
+
+        if (products.size() == 0) {
+            return new ArrayList<>();
+        }
+
+        return products;
     }
 
     private void reduceInventory(ProductInventory productInventory) {

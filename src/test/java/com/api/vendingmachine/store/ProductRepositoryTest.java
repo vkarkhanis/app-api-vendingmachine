@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,6 +52,14 @@ public class ProductRepositoryTest {
 
     @Test
     @Order(4)
+    public void findAllProducts() {
+
+        List<Product> products = productRepository.findAll();
+        assertEquals(1, products.size());
+    }
+
+    @Test
+    @Order(5)
     public void deleteProduct() {
 
         productRepository.deleteById(1);

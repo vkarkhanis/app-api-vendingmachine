@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import util.Status;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,5 +71,10 @@ public class VendingMachineControllerPathTest {
         when(moneyService.makeRefund(new Request())).thenReturn(null);
 
         mockMvc.perform(get("/vendingmachine/amount?requestId=1")).andExpect(status().isOk());
+    }
+
+    @Test
+    public void fetchAllProducts() throws Exception {
+        mockMvc.perform(get("/vendingmachine/product")).andExpect(status().isOk());
     }
 }
