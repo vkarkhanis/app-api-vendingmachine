@@ -10,10 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +43,16 @@ public class ProductServiceTest {
 
     }
 
+    @Test
+    public void getAllProductsTest() throws Exception {
+
+        Product[] products = new Product[]{new Product(1, 30, "Product 1"), new Product(2, 42, "Product 2")};
+        List<Product> allProducts = Arrays.asList(products);
+        when(productRepository.findAll()).thenReturn(allProducts);
+
+        List<Product> returnProducts = productService.getAllProducts();
+        assertEquals(2, returnProducts.size());
+    }
 
     @Test
     public void getProductInsufficientTest() {
