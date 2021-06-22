@@ -1,5 +1,7 @@
 package com.api.vendingmachine.services;
 
+import com.api.vendingmachine.exceptions.OrderCreationException;
+import com.api.vendingmachine.exceptions.OrderNotFound;
 import com.api.vendingmachine.models.Amount;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.api.vendingmachine.models.Request;
@@ -14,7 +16,7 @@ public class MoneyService {
 
     public MoneyService() {}
 
-    public Request addMoney(Amount amount, int requestId) throws Exception {
+    public Request addMoney(Amount amount, int requestId) throws OrderCreationException, OrderNotFound {
 
         Request reqCreated = null;
 
@@ -23,8 +25,11 @@ public class MoneyService {
             req.setBalance(amount.getAmount());
             req.setStatus(Status.MONEY_ADDED);
 
-            reqCreated = requestService.updateRequest(req);
-
+            try {
+                reqCreated = requestService.updateRequest(req);
+            } catch(Exception e) {
+                throw new OrderCreationException("Exception while creating new Order", e);
+            }
         } else {
             Request existingReq = requestService.getRequestByIdAndStatus(requestId, Status.MONEY_ADDED);
 
@@ -33,8 +38,9 @@ public class MoneyService {
                 reqCreated = requestService.updateRequest(existingReq);
 
             } else {
-                throw new Exception("Illegal request made");
+                throw new OrderNotFound("Could not find Order with order id: " + requestId);
             }
+            
         }
 
         return reqCreated;

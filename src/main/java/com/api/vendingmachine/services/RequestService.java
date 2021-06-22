@@ -25,9 +25,9 @@ public class RequestService {
         Optional<Request> existingRequest = requestRepository.findById(requestId);
         if(existingRequest.isPresent()) {
             return existingRequest.get();
-        } else {
-            throw new Exception("Invalid request id");
-        }
+        } 
+
+        throw new Exception("Invalid request id");
     }
 
     public Request getPendingRequestById(int requestId) {
