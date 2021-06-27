@@ -28,7 +28,7 @@ public class VendingMachineController {
     @PostMapping("/amount")
     public VendingMachineOutput amount(@RequestBody Amount amount) throws Exception {
         try {
-            Request req = moneyService.addMoney(amount, 0);
+            Request req = moneyService.addMoney(amount);
 
             if(req == null) {
                 throw new Exception("Error while adding amount");
@@ -47,7 +47,7 @@ public class VendingMachineController {
     public VendingMachineOutput amount(@RequestBody Amount amount, @RequestParam int requestId) throws Exception {
 
         try {
-            Request req = moneyService.addMoney(amount, requestId);
+            Request req = moneyService.updateMoney(amount, requestId);
             return new VendingMachineOutput(req.getId(), null,
                     new Amount(req.getBalance()),  new Amount(0), OperationStatus.MONEY_UPDATED);
 

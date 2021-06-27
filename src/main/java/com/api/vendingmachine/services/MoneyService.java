@@ -16,33 +16,36 @@ public class MoneyService {
 
     public MoneyService() {}
 
-    public Request addMoney(Amount amount, int requestId) throws OrderCreationException, OrderNotFound {
+    public Request addMoney(Amount amount) throws OrderCreationException {
 
         Request reqCreated = null;
 
-        if(requestId <= 0) {
-            Request req = new Request();
-            req.setBalance(amount.getAmount());
-            req.setStatus(Status.MONEY_ADDED);
+        Request req = new Request();
+        req.setBalance(amount.getAmount());
+        req.setStatus(Status.MONEY_ADDED);
 
-            try {
-                reqCreated = requestService.updateRequest(req);
-            } catch(Exception e) {
-                throw new OrderCreationException("Exception while creating new Order", e);
-            }
-        } else {
-            Request existingReq = requestService.getRequestByIdAndStatus(requestId, Status.MONEY_ADDED);
-
-            if(existingReq != null) {
-                existingReq.setBalance(existingReq.getBalance() + amount.getAmount());
-                reqCreated = requestService.updateRequest(existingReq);
-
-            } else {
-                throw new OrderNotFound("Could not find Order with order id: " + requestId);
-            }
-            
+        try {
+            reqCreated = requestService.updateRequest(req);
+        } catch(Exception e) {
+            throw new OrderCreationException("Exception while creating new Order", e);
         }
+         
 
+        return reqCreated;
+    }
+
+    public Request updateMoney(Amount amount, int requestId) throws OrderNotFound {
+
+        Request reqCreated = null;
+        Request existingReq = requestService.getRequestByIdAndStatus(requestId, Status.MONEY_ADDED);
+
+        if(existingReq != null) {
+            existingReq.setBalance(existingReq.getBalance() + amount.getAmount());
+            reqCreated = requestService.updateRequest(existingReq);
+
+        } else {
+            throw new OrderNotFound("Could not find Order with order id: " + requestId);
+        }
         return reqCreated;
     }
 

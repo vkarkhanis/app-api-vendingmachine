@@ -33,7 +33,7 @@ public class VendingMachineControllerPathTest {
 
     @Test
     public void addMoneyTest() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 0)).thenReturn(new Request());
+        when(moneyService.addMoney(new Amount(20))).thenReturn(new Request());
         mockMvc.perform(post("/vendingmachine/amount").contentType(MediaType.APPLICATION_JSON).content("{\"amount\": 20}"))
                 .andExpect(status().isOk());
     }
@@ -45,7 +45,7 @@ public class VendingMachineControllerPathTest {
 
     @Test
     public void addBalanceTest() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 1)).thenReturn(new Request());
+        when(moneyService.updateMoney(new Amount(20), 1)).thenReturn(new Request());
         mockMvc.perform(put("/vendingmachine/amount?requestId=1").contentType(MediaType.APPLICATION_JSON).content("{\"amount\": 20}"))
                 .andExpect(status().isOk());
     }

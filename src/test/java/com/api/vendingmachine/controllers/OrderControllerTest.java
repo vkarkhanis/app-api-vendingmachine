@@ -8,6 +8,7 @@ import com.api.vendingmachine.exceptions.OrderCreationException;
 import com.api.vendingmachine.exceptions.OrderNotFound;
 import com.api.vendingmachine.models.Amount;
 import com.api.vendingmachine.models.Request;
+import com.api.vendingmachine.models.Order;
 import com.api.vendingmachine.services.MoneyService;
 import com.api.vendingmachine.services.ProductService;
 import com.api.vendingmachine.services.RequestService;
@@ -51,33 +52,35 @@ public class OrderControllerTest {
    
     @Test
     public void createOrder() throws Exception {
-        when(moneyService.addMoney(new Amount(10d), 0))
+        when(moneyService.addMoney(new Amount(10d)))
         .thenReturn(request);
 
-        int reqId = orderController.createOrder(new Amount(10d));
-        assertEquals(0, reqId);
+        Order order = orderController.createOrder(new Amount(10d));
+        assertEquals(0, order.getId());
+        assertEquals(10, order.getBalance());
       
     }
 
     @Test
     public void createOrderException() throws Exception {
-        when(moneyService.addMoney(new Amount(10d), 0)).thenThrow(OrderCreationException.class);
+        when(moneyService.addMoney(new Amount(10d))).thenThrow(OrderCreationException.class);
         assertThrows(OrderCreationException.class, () -> orderController.createOrder(new Amount(20d)));
     }
 
     @Test
     public void updateOrder() throws Exception {
-        when(moneyService.addMoney(new Amount(10d), 1))
+        when(moneyService.updateMoney(new Amount(10d), 1))
         .thenReturn(request);
 
-        int reqId = orderController.updateOrder(new Amount(10d), 1);
-        assertEquals(0, reqId);
+        Order order = orderController.updateOrder(new Amount(10d), 1);
+        assertEquals(0, order.getId());
+        assertEquals(10, order.getBalance());
       
     }
 
     @Test
     public void updateOrderException() throws Exception {
-        when(moneyService.addMoney(new Amount(20d), 1)).thenThrow(OrderNotFound.class);
+        when(moneyService.updateMoney(new Amount(20d), 1)).thenThrow(OrderNotFound.class);
         assertThrows(OrderNotFound.class, () -> orderController.updateOrder(new Amount(20d), 1));
     }
     

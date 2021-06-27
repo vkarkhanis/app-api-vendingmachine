@@ -32,7 +32,7 @@ public class OrderControllerPathTest {
     
     @Test
     public void createOrder() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 0)).thenReturn(new Request());
+        when(moneyService.addMoney(new Amount(20))).thenReturn(new Request());
         mockMvc.perform(post("/vendingmachine/v2/order")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{\"amount\": 20}"))
@@ -41,14 +41,14 @@ public class OrderControllerPathTest {
 
     @Test
     public void createOrderMissingRequestBody() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 0)).thenReturn(new Request());
+        when(moneyService.addMoney(new Amount(20))).thenReturn(new Request());
         mockMvc.perform(post("/vendingmachine/v2/order"))
         .andExpect(status().isBadRequest());
     }
 
     @Test
     public void createOrderIncorrectRequestBody() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 0)).thenReturn(new Request());
+        when(moneyService.addMoney(new Amount(20))).thenReturn(new Request());
         mockMvc.perform(post("/vendingmachine/v2/order")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{\"somekey\": }"))
@@ -57,7 +57,7 @@ public class OrderControllerPathTest {
 
     @Test
     public void createOrderMissingAmount() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 0)).thenReturn(new Request());
+        when(moneyService.addMoney(new Amount(20))).thenReturn(new Request());
         mockMvc.perform(post("/vendingmachine/v2/order")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{}"))
@@ -66,6 +66,7 @@ public class OrderControllerPathTest {
 
     @Test
     public void updateOrder() throws Exception {
+        when(moneyService.updateMoney(new Amount(20), 1)).thenReturn(new Request());
         mockMvc.perform(put("/vendingmachine/v2/order/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{\"amount\": 20}"))
@@ -74,14 +75,14 @@ public class OrderControllerPathTest {
 
     @Test
     public void updateOrderMissingRequestBody() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 1)).thenReturn(new Request());
+        when(moneyService.updateMoney(new Amount(20), 1)).thenReturn(new Request());
         mockMvc.perform(put("/vendingmachine/v2/order/1"))
         .andExpect(status().isBadRequest());
     }
 
     @Test
     public void updateOrderIncorrectRequestBody() throws Exception {
-        when(moneyService.addMoney(new Amount(20), 1)).thenReturn(new Request());
+        when(moneyService.updateMoney(new Amount(20), 1)).thenReturn(new Request());
         mockMvc.perform(put("/vendingmachine/v2/order/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{\"somekey\": }"))

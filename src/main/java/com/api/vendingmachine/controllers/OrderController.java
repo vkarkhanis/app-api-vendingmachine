@@ -1,12 +1,15 @@
 package com.api.vendingmachine.controllers;
 
+import com.api.vendingmachine.exceptions.GenericException;
 import com.api.vendingmachine.exceptions.IncorrectPayloadException;
 import com.api.vendingmachine.exceptions.OrderCreationException;
 import com.api.vendingmachine.exceptions.OrderNotFound;
 import com.api.vendingmachine.models.Amount;
 import com.api.vendingmachine.models.Order;
+import com.api.vendingmachine.models.Product;
 import com.api.vendingmachine.models.Request;
 import com.api.vendingmachine.services.MoneyService;
+import com.api.vendingmachine.services.ProductService;
 import com.api.vendingmachine.services.RequestService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import util.Status;
+
 @RestController
 @RequestMapping("/vendingmachine/v2")
 @CrossOrigin(origins="http://localhost:3000")
@@ -28,46 +33,65 @@ public class OrderController {
     private MoneyService moneyService;
     @Autowired
     private RequestService requestService;
+    @Autowired
+    private ProductService productService;
  
     @PostMapping("/order")
-    public int createOrder(@RequestBody Amount amount) throws OrderCreationException, IncorrectPayloadException {
-
+    public Order createOrder(@RequestBody Amount amount) throws OrderCreationException, IncorrectPayloadException {
         try {
 
             if (amount == null || amount.getAmount() <= 0) {
                 throw new IncorrectPayloadException("No amount entered by the user");
             }
-            Request req = moneyService.addMoney(amount, 0);
+            Request req = moneyService.addMoney(amount);
             if (req != null) {
-                return req.getId();
+
+                Order order = new Order(req.getId(), req.getBalance(), req.getStatus());
+                return order;
             } 
-            throw new Exception();
+            throw new GenericException("Internal Error. Please contact API administrator");
         } catch(IncorrectPayloadException e) {
-            throw new IncorrectPayloadException(e.getLocalizedMessage());
+            throw e;
         } catch(Exception e) {
-            throw new OrderCreationException("Exception while creating order. "+ 
+            throw new OrderCreationException("Exception while creating order: "+ e.getMessage() +  
            " Please contact API Administrator");
         }
         
     }
 
     @PutMapping("/order/{orderId}")
-    public int updateOrder(@RequestBody Amount amount, @PathVariable int orderId) 
-    throws OrderNotFound, OrderCreationException, IncorrectPayloadException {
+    public Order updateOrder(@RequestBody Amount amount, @PathVariable int orderId) 
+    throws OrderNotFound, GenericException, IncorrectPayloadException {
 
         if (amount == null || amount.getAmount() <= 0) {
             throw new IncorrectPayloadException("No amount entered by the user");
         }
-        return moneyService.addMoney(amount, orderId).getId();
+        
+        Request req = null;
+
+        try {
+            req = moneyService.updateMoney(amount, orderId);
+        } catch(Exception e) {
+            throw new GenericException("Internal error, please contact API administrator", e);
+        }
+        
+        if (req != null) {
+
+            Order order = new Order(req.getId(), req.getBalance(), req.getStatus());
+            return order;
+        } 
+        throw new OrderNotFound("Order with order id: " + orderId + " not found");
     }
 
     @GetMapping("/order/{orderId}/refund")
     public double refund(@PathVariable int orderId) throws OrderNotFound, IncorrectPayloadException {
-        Request req = requestService.getPendingRequestById(orderId);
 
         if (orderId < 0) {
             throw new IncorrectPayloadException("Invalid orderId: " + orderId);
         }
+
+        Request req = requestService.getPendingRequestById(orderId);
+
         if (req == null) {
             throw new OrderNotFound("Order with Order Id: " + orderId + " not found");
         }
@@ -77,7 +101,49 @@ public class OrderController {
     }
 
     @GetMapping("/order/{orderId}/product/{productId}")
-    public Order getProduct(@PathVariable int orderId, @PathVariable int productId) {
-        return null;
+    public Order getProduct(@PathVariable int orderId, @PathVariable int productId) throws IncorrectPayloadException, GenericException{
+        try {
+
+            if (orderId < 0) {
+                throw new IncorrectPayloadException("Invalid orderId: " + orderId);
+            }
+            if (productId <= 0) {
+                throw new IncorrectPayloadException("Invalid product id: " + productId);
+            }
+
+            Request req = requestService.getRequestByIdAndStatus(orderId, Status.MONEY_ADDED);
+
+            if (req == null) {
+                throw new OrderNotFound("Order with Order Id: " + orderId + " Wnot found");
+            }
+
+            Product product = productService.getProduct(productId);
+
+            if(product.getPrice() <= 0) {
+                throw new GenericException("Product price not found");
+            }
+
+            if (product.getPrice() > req.getBalance()) {
+                throw new GenericException("Insufficient balance");     
+            }
+
+            req.setStatus(Status.PROCESSING_ORDER);
+            requestService.updateRequest(req);
+
+            double change = req.getBalance() - product.getPrice();
+
+            req.setBalance(0);
+            req.setStatus(Status.REQUEST_COMPLETED);
+            requestService.updateRequest(req);
+
+            Order order = new Order(orderId, change, Status.REQUEST_COMPLETED);
+            order.setProduct(product);
+            return order;
+
+        } catch (IncorrectPayloadException e) {
+            throw e;
+        } catch(Exception e) {
+           throw new GenericException("Processing error. Please contact customer service", e);
+        }
     }
 }

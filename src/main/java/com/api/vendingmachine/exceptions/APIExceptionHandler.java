@@ -18,15 +18,21 @@ public class APIExceptionHandler extends ResponseEntityExceptionHandler {
    }
 
    @ExceptionHandler({OrderCreationException.class})
-   protected ResponseEntity<APIError> handleEntityNotFound(OrderCreationException ex) {
+   protected ResponseEntity<APIError> handleOrderCreation(OrderCreationException ex) {
        APIError apiError = new APIError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), new ArrayList<String>());
        return new ResponseEntity<APIError>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
    }
 
    @ExceptionHandler({IncorrectPayloadException.class})
-   protected ResponseEntity<APIError> handleEntityNotFound(IncorrectPayloadException ex) {
+   protected ResponseEntity<APIError> handleIncorrectPayload(IncorrectPayloadException ex) {
        APIError apiError = new APIError(HttpStatus.BAD_REQUEST, ex.getMessage(), new ArrayList<String>());
        return new ResponseEntity<APIError>(apiError, HttpStatus.BAD_REQUEST);
+   }
+
+   @ExceptionHandler({GenericException.class})
+   protected ResponseEntity<APIError> handleGenericException(GenericException ex) {
+       APIError apiError = new APIError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), new ArrayList<String>());
+       return new ResponseEntity<APIError>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
    }
 
 }

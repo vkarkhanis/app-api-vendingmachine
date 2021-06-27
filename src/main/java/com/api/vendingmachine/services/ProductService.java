@@ -4,9 +4,9 @@ import com.api.vendingmachine.models.Product;
 import com.api.vendingmachine.models.ProductInventory;
 import com.api.vendingmachine.store.ProductInventoryRepository;
 import com.api.vendingmachine.store.ProductRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
