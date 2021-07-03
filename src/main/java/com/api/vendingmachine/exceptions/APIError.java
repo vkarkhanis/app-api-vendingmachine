@@ -3,33 +3,31 @@ package com.api.vendingmachine.exceptions;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-
 public class APIError {
 
-    private HttpStatus status;
+    private ERROR_CODES status;
     private String message;
     private List<String> errors;
 
-    public APIError(HttpStatus status, String message, List<String> errors) {
+    public APIError(ERROR_CODES status, String message, List<String> errors) {
         super();
         this.status = status;
         this.message = message;
         this.errors = errors;
     }
 
-    public APIError(HttpStatus status, String message, String error) {
+    public APIError(ERROR_CODES status, String message, String error) {
         super();
         this.status = status;
         this.message = message;
         errors = Arrays.asList(error);
     }
     
-    public HttpStatus getStatus() {
+    public ERROR_CODES getStatus() {
         return status;
     }
 
-    public void setStatus(HttpStatus status) {
+    public void setStatus(ERROR_CODES status) {
         this.status = status;
     }
 

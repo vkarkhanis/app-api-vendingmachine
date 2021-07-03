@@ -8,30 +8,40 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+enum ERROR_CODES {
+    ORDER_NOT_FOUND, ORDER_CREATION_FAILURE, INCORRECT_PAYLOAD, GENERIC_FAILURE, INSUFFICIENT_BALANCE
+}
+
 @ControllerAdvice
 public class APIExceptionHandler extends ResponseEntityExceptionHandler {
 
-   @ExceptionHandler({OrderNotFound.class})
-   protected ResponseEntity<APIError> handleEntityNotFound(OrderNotFound ex) {
-       APIError apiError = new APIError(HttpStatus.NOT_FOUND, ex.getMessage(), new ArrayList<String>());
+   @ExceptionHandler({OrderNotFoundException.class})
+   protected ResponseEntity<APIError> handleEntityNotFoundException(OrderNotFoundException ex) {
+       APIError apiError = new APIError(ERROR_CODES.ORDER_NOT_FOUND, ex.getMessage(), new ArrayList<String>());
        return new ResponseEntity<APIError>(apiError, HttpStatus.NOT_FOUND);
    }
 
    @ExceptionHandler({OrderCreationException.class})
-   protected ResponseEntity<APIError> handleOrderCreation(OrderCreationException ex) {
-       APIError apiError = new APIError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), new ArrayList<String>());
+   protected ResponseEntity<APIError> handleOrderCreationException(OrderCreationException ex) {
+       APIError apiError = new APIError(ERROR_CODES.ORDER_CREATION_FAILURE, ex.getMessage(), new ArrayList<String>());
        return new ResponseEntity<APIError>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
    }
 
    @ExceptionHandler({IncorrectPayloadException.class})
-   protected ResponseEntity<APIError> handleIncorrectPayload(IncorrectPayloadException ex) {
-       APIError apiError = new APIError(HttpStatus.BAD_REQUEST, ex.getMessage(), new ArrayList<String>());
+   protected ResponseEntity<APIError> handleIncorrectPayloadException(IncorrectPayloadException ex) {
+       APIError apiError = new APIError(ERROR_CODES.INCORRECT_PAYLOAD, ex.getMessage(), new ArrayList<String>());
        return new ResponseEntity<APIError>(apiError, HttpStatus.BAD_REQUEST);
    }
 
    @ExceptionHandler({GenericException.class})
    protected ResponseEntity<APIError> handleGenericException(GenericException ex) {
-       APIError apiError = new APIError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), new ArrayList<String>());
+       APIError apiError = new APIError(ERROR_CODES.GENERIC_FAILURE, ex.getMessage(), new ArrayList<String>());
+       return new ResponseEntity<APIError>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+   }
+
+   @ExceptionHandler({InsufficientBalanceException.class})
+   protected ResponseEntity<APIError> handleInsufficientBalanceException(InsufficientBalanceException ex) {
+       APIError apiError = new APIError(ERROR_CODES.INSUFFICIENT_BALANCE, ex.getMessage(), new ArrayList<String>());
        return new ResponseEntity<APIError>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
    }
 

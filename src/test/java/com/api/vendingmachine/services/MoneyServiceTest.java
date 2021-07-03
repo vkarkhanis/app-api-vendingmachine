@@ -48,10 +48,10 @@ public class MoneyServiceTest {
         updateReq.setBalance(50);
         when(requestService.updateRequest(updateReq)).thenReturn(updateReq);
 
-        Request req = moneyService.addMoney(new Amount(20), 0);
+        Request req = moneyService.addMoney(new Amount(20));
         assertEquals(20, req.getBalance());
 
-        req = moneyService.addMoney(new Amount(30), 1);
+        req = moneyService.addMoney(new Amount(30));
         assertEquals(50, req.getBalance());
 
     }
@@ -60,7 +60,7 @@ public class MoneyServiceTest {
     public void addMoneyInvalidRequest() throws Exception {
 
         when(requestService.getRequestByIdAndStatus(1, Status.REQUEST_COMPLETED)).thenReturn(null);
-        assertThrows(Exception.class, () -> moneyService.addMoney(new Amount(20), 1));
+        assertThrows(Exception.class, () -> moneyService.addMoney(new Amount(20)));
     }
 
     @Test

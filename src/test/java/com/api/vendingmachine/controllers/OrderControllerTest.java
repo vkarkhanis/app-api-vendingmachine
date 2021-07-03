@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.api.vendingmachine.exceptions.OrderCreationException;
-import com.api.vendingmachine.exceptions.OrderNotFound;
+import com.api.vendingmachine.exceptions.OrderNotFoundException;
 import com.api.vendingmachine.models.Amount;
 import com.api.vendingmachine.models.Request;
 import com.api.vendingmachine.models.Order;
@@ -80,8 +80,8 @@ public class OrderControllerTest {
 
     @Test
     public void updateOrderException() throws Exception {
-        when(moneyService.updateMoney(new Amount(20d), 1)).thenThrow(OrderNotFound.class);
-        assertThrows(OrderNotFound.class, () -> orderController.updateOrder(new Amount(20d), 1));
+        when(moneyService.updateMoney(new Amount(20d), 1)).thenThrow(OrderNotFoundException.class);
+        assertThrows(OrderNotFoundException.class, () -> orderController.updateOrder(new Amount(20d), 1));
     }
     
     @Test
@@ -97,6 +97,6 @@ public class OrderControllerTest {
     public void refundMissingOrder() throws Exception {
         when(requestService.getPendingRequestById(1)).thenReturn(null);
         
-        assertThrows(OrderNotFound.class, () -> orderController.refund(1));
+        assertThrows(OrderNotFoundException.class, () -> orderController.refund(1));
     }
 }

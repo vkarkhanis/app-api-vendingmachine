@@ -2,8 +2,9 @@ package com.api.vendingmachine.controllers;
 
 import com.api.vendingmachine.exceptions.GenericException;
 import com.api.vendingmachine.exceptions.IncorrectPayloadException;
+import com.api.vendingmachine.exceptions.InsufficientBalanceException;
 import com.api.vendingmachine.exceptions.OrderCreationException;
-import com.api.vendingmachine.exceptions.OrderNotFound;
+import com.api.vendingmachine.exceptions.OrderNotFoundException;
 import com.api.vendingmachine.models.Amount;
 import com.api.vendingmachine.models.Order;
 import com.api.vendingmachine.models.Product;
@@ -37,7 +38,8 @@ public class OrderController {
     private ProductService productService;
  
     @PostMapping("/order")
-    public Order createOrder(@RequestBody Amount amount) throws OrderCreationException, IncorrectPayloadException {
+    public Order createOrder(@RequestBody Amount amount) 
+        throws OrderCreationException, IncorrectPayloadException {
         try {
 
             if (amount == null || amount.getAmount() <= 0) {
@@ -61,7 +63,7 @@ public class OrderController {
 
     @PutMapping("/order/{orderId}")
     public Order updateOrder(@RequestBody Amount amount, @PathVariable int orderId) 
-    throws OrderNotFound, GenericException, IncorrectPayloadException {
+        throws OrderNotFoundException, GenericException, IncorrectPayloadException {
 
         if (amount == null || amount.getAmount() <= 0) {
             throw new IncorrectPayloadException("No amount entered by the user");
@@ -80,53 +82,63 @@ public class OrderController {
             Order order = new Order(req.getId(), req.getBalance(), req.getStatus());
             return order;
         } 
-        throw new OrderNotFound("Order with order id: " + orderId + " not found");
+        throw new OrderNotFoundException("Order with order id: " + orderId + " not found");
     }
 
     @GetMapping("/order/{orderId}/refund")
-    public double refund(@PathVariable int orderId) throws OrderNotFound, IncorrectPayloadException {
+    public double refund(@PathVariable int orderId) 
+        throws OrderNotFoundException, IncorrectPayloadException {
 
         if (orderId < 0) {
             throw new IncorrectPayloadException("Invalid orderId: " + orderId);
         }
 
         Request req = requestService.getPendingRequestById(orderId);
-
         if (req == null) {
-            throw new OrderNotFound("Order with Order Id: " + orderId + " not found");
+            throw new OrderNotFoundException("Order with Order Id: " + orderId + " not found");
         }
+        
+        double balance = req.getBalance();
 
         moneyService.makeRefund(req);
-        return req.getBalance();
+        return balance;
     }
 
     @GetMapping("/order/{orderId}/product/{productId}")
-    public Order getProduct(@PathVariable int orderId, @PathVariable int productId) throws IncorrectPayloadException, GenericException{
+    public Order getProduct(@PathVariable int orderId, @PathVariable int productId) 
+        throws OrderNotFoundException, IncorrectPayloadException, GenericException, 
+        InsufficientBalanceException{
+        
+
+        if (orderId < 0) {
+            throw new IncorrectPayloadException("Invalid orderId: " + orderId);
+        }
+        if (productId <= 0) {
+            throw new IncorrectPayloadException("Invalid product id: " + productId);
+        }
+
+        Request req = requestService.getRequestByIdAndStatus(orderId, Status.MONEY_ADDED);
+
+        if (req == null) {
+            throw new OrderNotFoundException("Order with Order Id: " + orderId + " not found");
+        }
+
+        Product product;
         try {
+            product = productService.getProduct(productId);
+        } catch (Exception e) {
+            throw new GenericException("Internal error while fetching product details: " + e.getLocalizedMessage(), e);
+        }
 
-            if (orderId < 0) {
-                throw new IncorrectPayloadException("Invalid orderId: " + orderId);
-            }
-            if (productId <= 0) {
-                throw new IncorrectPayloadException("Invalid product id: " + productId);
-            }
+        if(product.getPrice() <= 0) {
+            throw new GenericException("Product price not found");
+        }
 
-            Request req = requestService.getRequestByIdAndStatus(orderId, Status.MONEY_ADDED);
+        if (product.getPrice() > req.getBalance()) {
+            throw new InsufficientBalanceException("Insufficient balance");     
+        }
 
-            if (req == null) {
-                throw new OrderNotFound("Order with Order Id: " + orderId + " Wnot found");
-            }
-
-            Product product = productService.getProduct(productId);
-
-            if(product.getPrice() <= 0) {
-                throw new GenericException("Product price not found");
-            }
-
-            if (product.getPrice() > req.getBalance()) {
-                throw new GenericException("Insufficient balance");     
-            }
-
+        try {
             req.setStatus(Status.PROCESSING_ORDER);
             requestService.updateRequest(req);
 
@@ -140,8 +152,6 @@ public class OrderController {
             order.setProduct(product);
             return order;
 
-        } catch (IncorrectPayloadException e) {
-            throw e;
         } catch(Exception e) {
            throw new GenericException("Processing error. Please contact customer service", e);
         }
