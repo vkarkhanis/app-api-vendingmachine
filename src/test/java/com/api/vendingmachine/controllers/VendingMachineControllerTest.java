@@ -51,7 +51,7 @@ public class VendingMachineControllerTest {
                 new Amount(10), new Amount(0),
                 OperationStatus.MONEY_ADDED);
 
-        when(moneyService.addMoney(new Amount(10), 0)).thenReturn(request);
+        when(moneyService.addMoney(new Amount(10))).thenReturn(request);
 
         VendingMachineOutput actualOutput = vendingMachineController.amount(new Amount(10));
         assertEquals(expectedOutput, actualOutput);
@@ -62,7 +62,7 @@ public class VendingMachineControllerTest {
     @Test
     public void addMoneyFailureTest() throws Exception {
 
-        when(moneyService.addMoney(new Amount(10), 0)).thenReturn(null);
+        when(moneyService.addMoney(new Amount(10))).thenReturn(null);
 
         assertThrows(Exception.class, ()-> vendingMachineController.amount(new Amount(10), 0));
     }
@@ -74,7 +74,7 @@ public class VendingMachineControllerTest {
                 new Amount(10), new Amount(0),
                 OperationStatus.MONEY_UPDATED);
 
-        when(moneyService.addMoney(new Amount(10), 1)).thenReturn(request);
+        when(moneyService.updateMoney(new Amount(10), 1)).thenReturn(request);
 
         VendingMachineOutput actualOutput = vendingMachineController.amount(new Amount(10), 1);
         assertEquals(expectedOutput, actualOutput);
@@ -85,7 +85,7 @@ public class VendingMachineControllerTest {
     @Test
     public void updateMoneyFailureTest() throws Exception {
 
-        when(moneyService.addMoney(new Amount(10), 1)).thenReturn(null);
+        when(moneyService.updateMoney(new Amount(10), 1)).thenReturn(null);
 
         assertThrows(Exception.class, ()-> vendingMachineController.amount(new Amount(10), 1));
     }

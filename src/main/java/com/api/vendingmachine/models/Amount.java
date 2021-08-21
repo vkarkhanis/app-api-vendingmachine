@@ -18,12 +18,12 @@ public class Amount {
 
     public Amount addAmount(Amount amount) {
 
-        return new Amount(0);
+        return new Amount(0d);
     }
 
     public Amount deductAmount(Amount amount) {
 
-        return new Amount(0);
+        return new Amount(0d);
     }
 
     @Override
